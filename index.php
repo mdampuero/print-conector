@@ -1,17 +1,25 @@
 <?php
+
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: *");
+header("Access-Control-Allow-Methods: POST");
+
 require __DIR__ . '/vendor/autoload.php';
 
-use Mike42\Escpos\PrintConnectors\CupsPrintConnector;
+use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 use Mike42\Escpos\PrintConnectors\FilePrintConnector;
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\EscposImage;
 use Mike42\Escpos\CapabilityProfile;
 
-
 try {
-    
-    // $connector = new CupsPrintConnector("Printer_POS_80");
-    $connector = new FilePrintConnector("output.txt");
+    $json = file_get_contents('php://input');
+    $body = json_decode($json, true);
+    if(!$body){
+        exit();
+    }
+    $connector = new WindowsPrintConnector("POS-80");
+   // $connector = new FilePrintConnector("output.txt");
     $printer = new Printer($connector);
 
     $data = [
@@ -48,9 +56,8 @@ try {
         ],
         "total" => 17.70
     ];
-    /** 
-     * 
-     */
+
+    $paylod = $body;
 
     $printer->setJustification(Printer::JUSTIFY_CENTER);
     $printer->setTextSize(2, 2);
@@ -89,7 +96,6 @@ try {
     $printer->text("\n\n\n");
     $printer->cut();
 
-    // Cerrar la conexión con la impresora
     $printer->close();
 
 } catch (Exception $e) {
